@@ -36,7 +36,6 @@ class GCloudStorageTests(GCloudTestCase):
         """
         data = b"This is some test read data."
 
-        self.storage._client = mock.MagicMock()
         with self.storage.open(self.filename) as f:
             self.storage._client.bucket.assert_called_with(self.bucket_name)
             self.storage._bucket.get_blob.assert_called_with(
@@ -50,7 +49,6 @@ class GCloudStorageTests(GCloudTestCase):
         data = b"This is some test read data."
         num_bytes = 10
 
-        self.storage._client = mock.MagicMock()
         with self.storage.open(self.filename) as f:
             self.storage._client.bucket.assert_called_with(self.bucket_name)
             self.storage._bucket.get_blob.assert_called_with(
@@ -109,7 +107,6 @@ class GCloudStorageTests(GCloudTestCase):
         data = "This is some test content."
         content = ContentFile(data)
 
-        self.storage._client = mock.MagicMock()
         self.storage.save(self.filename, content)
 
         self.storage._client.bucket.assert_called_with(self.bucket_name)
@@ -127,7 +124,6 @@ class GCloudStorageTests(GCloudTestCase):
         filename = "ủⓝï℅ⅆℇ.txt"
         content = ContentFile(data)
 
-        self.storage._client = mock.MagicMock()
         self.storage.save(filename, content)
 
         self.storage._client.bucket.assert_called_with(self.bucket_name)
@@ -149,7 +145,7 @@ class GCloudStorageTests(GCloudTestCase):
         # 'projectPrivate', 'bucketOwnerRead', 'bucketOwnerFullControl',
         # 'private', 'authenticatedRead', 'publicRead', 'publicReadWrite'
         self.storage.default_acl = "publicRead"
-        self.storage._client = mock.MagicMock()
+
         self.storage.save(filename, content)
 
         self.storage._client.bucket.assert_called_with(self.bucket_name)
@@ -163,7 +159,6 @@ class GCloudStorageTests(GCloudTestCase):
         )
 
     def test_delete(self):
-        self.storage._client = mock.MagicMock()
         self.storage.delete(self.filename)
 
         self.storage._client.bucket.assert_called_with(self.bucket_name)
@@ -190,7 +185,6 @@ class GCloudStorageTests(GCloudTestCase):
 
     def test_exists_bucket(self):
         # exists('') should return True if the bucket exists
-        self.storage._client = mock.MagicMock()
         self.assertTrue(self.storage.exists(""))
 
     def test_exists_file_overwrite(self):
@@ -377,7 +371,6 @@ class GCloudStorageTests(GCloudTestCase):
 
         self.storage.default_acl = "publicRead"
         url = "{}/{}".format(self.storage.custom_endpoint, self.filename)
-        self.storage._client = mock.MagicMock()
         self.assertEqual(self.storage.url(self.filename), url)
 
         bucket_name = "hyacinth"
@@ -421,7 +414,6 @@ class GCloudStorageTests(GCloudTestCase):
             GS_OBJECT_PARAMETERS={"cache_control": "public, max-age=604800"}
         ):
             self.storage = gcloud.GoogleCloudStorage(bucket_name=self.bucket_name)
-            self.storage._client = mock.MagicMock()
             self.storage.save(filename, content)
             bucket = self.storage.client.bucket(self.bucket_name)
             blob = bucket.get_blob(filename)
@@ -435,7 +427,6 @@ class GCloudStorageTests(GCloudTestCase):
         content = ContentFile("I should be gzip'd")
 
         # When
-        self.storage._client = mock.MagicMock()
         self.storage.save(name, content)
         self.storage.save("test_storage_save_2.css", content)
 
@@ -537,7 +528,6 @@ class GoogleCloudGzipClientTests(GCloudTestCase):
         patcher = mock.patch("google.cloud.storage.Bucket.get_blob", return_value=blob)
         try:
             patcher.start()
-            self.storage._client = mock.MagicMock()
             self.storage.save(name, content)
             obj = self.storage._bucket.get_blob()
             obj.upload_from_file.assert_called_with(
@@ -565,7 +555,6 @@ class GoogleCloudGzipClientTests(GCloudTestCase):
 
         try:
             patcher.start()
-            self.storage._client = mock.MagicMock()
             self.storage.save(name, content)
             obj = self.storage._bucket.get_blob()
             obj.upload_from_file.assert_called_with(
